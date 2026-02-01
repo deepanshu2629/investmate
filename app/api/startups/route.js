@@ -35,8 +35,10 @@ export async function GET(request) {
     }
 
     const startups = await Startup.find(filter)
+      .select('startupName tagline founderName location stage industry problem solution traction userId createdAt')
       .populate("userId", "name email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json(startups);
   } catch (error) {

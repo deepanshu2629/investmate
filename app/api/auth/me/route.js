@@ -15,7 +15,7 @@ export async function GET(request) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await User.findById(decoded.userId).select("-password").lean();
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -23,9 +23,9 @@ export async function GET(request) {
 
     let profile = null;
     if (user.role === "startup") {
-      profile = await Startup.findOne({ userId: user._id });
+      profile = await Startup.findOne({ userId: user._id }).lean();
     } else if (user.role === "investor") {
-      profile = await Investor.findOne({ userId: user._id });
+      profile = await Investor.findOne({ userId: user._id }).lean();
     }
 
     return NextResponse.json({ user, profile });

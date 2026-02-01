@@ -27,5 +27,10 @@ const connectionSchema = new mongoose.Schema(
 
 // Prevent duplicate connection requests
 connectionSchema.index({ investorId: 1, startupId: 1 }, { unique: true });
+// Index for filtering by status
+connectionSchema.index({ status: 1 });
+// Index for querying connections by investor or startup
+connectionSchema.index({ investorId: 1, status: 1 });
+connectionSchema.index({ startupId: 1, status: 1 });
 
 export default mongoose.models.Connection || mongoose.model("Connection", connectionSchema);

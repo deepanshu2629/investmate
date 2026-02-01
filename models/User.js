@@ -28,4 +28,8 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Index for filtering users by role
+userSchema.index({ role: 1 });
+// Note: email index is already created by unique: true
+
 export default mongoose.models.User || mongoose.model("User", userSchema);

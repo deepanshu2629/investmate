@@ -21,7 +21,7 @@ export async function POST(request) {
     }
 
     // Get investor profile
-    const investor = await Investor.findOne({ userId: decoded.userId });
+    const investor = await Investor.findOne({ userId: decoded.userId }).select('_id').lean();
     if (!investor) {
       return NextResponse.json({ error: "Investor profile not found" }, { status: 404 });
     }
@@ -32,7 +32,7 @@ export async function POST(request) {
     const existing = await Connection.findOne({
       investorId: investor._id,
       startupId,
-    });
+    }).select('_id').lean();
 
     if (existing) {
       return NextResponse.json({ error: "Already expressed interest" }, { status: 400 });
@@ -70,24 +70,28 @@ export async function GET(request) {
     if (decoded.role === "startup") {
       // Startup sees interested investors
       const Startup = (await import("@/models/Startup")).default;
-      const startup = await Startup.findOne({ userId: decoded.userId });
+      const startup = await Startup.findOne({ userId: decoded.userId }).select('_id').lean();
       
       connections = await Connection.find({ startupId: startup._id })
         .populate({
           path: "investorId",
+          select: "fullName firm sectors location bio",
           populate: { path: "userId", select: "name email" }
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
     } else {
       // Investor sees their sent requests
-      const investor = await Investor.findOne({ userId: decoded.userId });
+      const investor = await Investor.findOne({ userId: decoded.userId }).select('_id').lean();
       
       connections = await Connection.find({ investorId: investor._id })
         .populate({
           path: "startupId",
+          select: "startupName tagline stage industry location",
           populate: { path: "userId", select: "name email" }
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
     }
 
     return NextResponse.json(connections);
